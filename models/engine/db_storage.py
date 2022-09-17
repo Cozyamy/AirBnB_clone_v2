@@ -9,7 +9,7 @@ from models.place import Place
 from models.review import Review
 from os import getenv
 from sqlalchemy import create_engine
-from sql_alchemy.orm import sessionmaker, scoped_session
+from sqlalchemy.orm import sessionmaker, scoped_session
 
 all_classes = {"State", "City", "Amenity", "User", "Place", "Review"}
 
