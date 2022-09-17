@@ -47,10 +47,11 @@ class FileStorage:
         """serialize the file path to JSON file path"""
         try:
             with open(self.__file_path, 'r', encoding="UTF-8") as f:
-                for key, value in (json.load(f)).items():
-                    value = eval(value["__class__"])(**value)
-                    self.__objects[key] = value
-        except FileNotFoundError:
+                json_dict = json.load(f)
+                for value in json_dict.values():
+                    cls = value['__class__']
+                    self.new(eval('{}({})'.format(cls, '**value')))
+        except (FileNotFoundError):
             pass
 
     def delete(self, obj=None):
