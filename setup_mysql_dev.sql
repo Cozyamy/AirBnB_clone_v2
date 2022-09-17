@@ -6,6 +6,7 @@
 -- hbnb_dev should have SELECT privilege on the database performance_schema
 -- If the database hbnb_dev_db or the user hbnb_dev already exists,
 -- + your script should not fail
+DROP DATABASE IF EXISTS hbnb_dev_db;
 CREATE DATABASE IF NOT EXISTS hbnb_dev_db;
 DROP USER IF EXISTS 'hbnb_dev'@'localhost';
 CREATE USER IF NOT EXISTS 'hbnb_dev'@'localhost' IDENTIFIED BY 'hbnb_dev_pwd';
