@@ -1,77 +1,77 @@
 #!/usr/bin/python3
-""" This is the db storage class for airbnb """
-from models.base_model import BaseModel, Base
-from models.user import User
-from models.state import State
-from models.city import City
+"""This module defines the DBStorage engine"""
+from os import getenv
+from models.base_model import Base
+from models.base_model import BaseModel
 from models.amenity import Amenity
+from models.city import City
 from models.place import Place
 from models.review import Review
-from os import getenv
+from models.state import State
+from models.user import User
 import sqlalchemy
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, scoped_session, relationship
-
-all_classes = {"State", "City", "Amenity", "User", "Place", "Review"}
+from sqlalchemy.orm import relationship
+from sqlalchemy.orm import scoped_session
+from sqlalchemy.orm import sessionmaker
 
 
 class DBStorage:
-    """
-    Private class attributes
-    """
+    """Class for DBStorage engine"""
 
     __engine = None
     __session = None
 
     def __init__(self):
+        """Initialisation of DBStorage engine"""
         self.__engine = create_engine("mysql+mysqldb://{}:{}@{}/{}".
                                       format(getenv("HBNB_MYSQL_USER"),
                                              getenv("HBNB_MYSQL_PWD"),
                                              getenv("HBNB_MYSQL_HOST"),
                                              getenv("HBNB_MYSQL_DB")),
                                       pool_pre_ping=True)
-
-        if getenv('HBNB_ENV') == 'test':
+        if getenv("HBNB_ENV") == "test":
             Base.metadata.drop_all(self.__engine)
 
     def all(self, cls=None):
-        entities = dict()
-
-        if cls:
-            return self.get_data_from_table(cls, entities)
-
-        for entity in all_classes:
-            entities = self.get_data_from_table(eval(entity), entities)
-
-            return entities
+        """Query on current database session"""
+        new_dict = {}
+        if cls is None:
+            objs = self.__session.query(State).all()
+            objs.extend(self.__session.query(City).all())
+            objs.extend(self.__session.query(User).all())
+            objs.extend(self.__session.query(Place).all())
+            objs.extend(self.__session.query(Review).all())
+            objs.extend(self.__session.query(Amenity).all())
+        else:
+            if isinstance(cls, str):
+                cls = eval(cls)
+            objs = self.__session.query(cls)
+            for o in objs:
+                key = o.__class__.__name__ + '.' + o.id
+                new_dict[key] = o
+        return (new_dict)
 
     def new(self, obj):
-        if obj:
-            self.__session.add(obj)
+        """adds obj to current database session"""
+        self.__session.add(obj)
 
     def save(self):
+        """Commit new changes to current database session"""
         self.__session.commit()
 
     def delete(self, obj=None):
+        """deletes obj from current database session"""
         if obj is not None:
             self.__session.delete(obj)
 
     def reload(self):
+        """creates all tables in database and creates new session"""
         Base.metadata.create_all(self.__engine)
-        session_factory = sessionmaker(bind=self.__engine,
-                                       expire_on_commit=False)
-        Session = scoped_session(session_factory)
+        sess_factory = sessionmaker(bind=self.__engine, expire_on_commit=False)
+        Session = scoped_session(sess_factory)
         self.__session = Session()
 
-    def get_data_from_table(self, cls, structure):
-        if type(structure) is dict:
-            query = self.__session.query(cls)
-
-            for _row in query.all():
-                key = "{}.{}".format(cls.__name__, _row.id)
-                structure[key] = _row
-
-            return structure
-
     def close(self):
+        """to close current database session"""
         self.__session.close()
