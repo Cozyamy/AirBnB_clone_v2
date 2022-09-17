@@ -17,6 +17,7 @@ class FileStorage:
     __objects = {}
 
     def all(self, cls=None):
+        """Returns all the objects"""
         if cls:
             same_type = dict()
 
@@ -29,11 +30,13 @@ class FileStorage:
         return self.__objects
 
     def new(self, obj):
+        """sets __object to given obj"""
         if obj:
             key = "{}.{}".format(type(obj).__name__, obj.id)
             self.__objects[key] = obj
 
     def save(self):
+        """serialize the file path to JSON file path"""
         my_dict = {}
         for key, value in self.__objects.items():
             my_dict[key] = value.to_dict()
@@ -41,6 +44,7 @@ class FileStorage:
             json.dump(my_dict, f)
 
     def reload(self):
+        """serialize the file path to JSON file path"""
         try:
             with open(self.__file_path, 'r', encoding="UTF-8") as f:
                 for key, value in (json.load(f)).items():
@@ -50,6 +54,7 @@ class FileStorage:
             pass
 
     def delete(self, obj=None):
+        """Delete obj from __objects if it's inside"""
         if obj:
             key = "{}.{}".format(type(obj).__name__, obj.id)
 
@@ -58,4 +63,5 @@ class FileStorage:
                 self.save()
 
     def close(self):
+        """Deserialize the JSON file to objects"""
         self.reload()
