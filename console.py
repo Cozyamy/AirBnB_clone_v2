@@ -2,6 +2,8 @@
 """ Console Module """
 import cmd
 import sys
+import os
+import models
 from models.base_model import BaseModel
 from models.__init__ import storage
 from models.user import User
@@ -10,7 +12,11 @@ from models.state import State
 from models.city import City
 from models.amenity import Amenity
 from models.review import Review
+<<<<<<< HEAD
 import shlex
+=======
+from shlex import split
+>>>>>>> e60ed55b4b5c778952ea3e45151a3b87845b1743
 
 
 class HBNBCommand(cmd.Cmd):
@@ -31,6 +37,7 @@ class HBNBCommand(cmd.Cmd):
         'latitude': float, 'longitude': float
     }
 
+<<<<<<< HEAD
     def preloop(self):
         """Prints if isatty is false"""
         if not sys.__stdin__.isatty():
@@ -92,6 +99,8 @@ class HBNBCommand(cmd.Cmd):
             print('(hbnb) ', end='')
         return stop
 
+=======
+>>>>>>> e60ed55b4b5c778952ea3e45151a3b87845b1743
     def do_quit(self, command):
         """ Method to exit the HBNB console"""
         exit()
@@ -117,6 +126,7 @@ class HBNBCommand(cmd.Cmd):
         """ Create an object of any class"""
         if len(args) == 0:
             print("** class name missing **")
+<<<<<<< HEAD
             return
         try:
             args = shlex.split(args)
@@ -139,6 +149,32 @@ class HBNBCommand(cmd.Cmd):
         except:
             print("** class doesn't exist **")
             return
+=======
+            return False
+        arg_split = args.split(" ")
+        if arg_split[0] not in HBNBCommand.classes:
+            print("** class doesn't exist **")
+            return False
+        else:
+            kwargs = {}
+            for i in range(1, len(arg_split)):
+                key, value = tuple(arg_split[i].split("="))
+                if value[0] and value[-1] == '"':
+                    value = value.strip('"').replace("_", " ")
+                else:
+                    try:
+                        value = eval(value)
+                    except(SyntaxError, NameError):
+                        continue
+                kwargs[key] = value
+
+        if kwargs == {}:
+            new_instance = eval(arg_split[0])()
+        else:
+            new_instance = eval(arg_split[0])(**kwargs)
+        print(new_instance.id)
+        new_instance.save()
+>>>>>>> e60ed55b4b5c778952ea3e45151a3b87845b1743
 
     def help_create(self):
         """ Help information for the create method """
@@ -211,6 +247,7 @@ class HBNBCommand(cmd.Cmd):
         print("Destroys an individual instance of a class")
         print("[Usage]: destroy <className> <objectId>\n")
 
+<<<<<<< HEAD
     # def do_all(self, args):
     #     """ Shows all objects, or all objects of a class"""
     #     print_list = []
@@ -226,6 +263,24 @@ class HBNBCommand(cmd.Cmd):
     #     else:
     #         for k, v in storage._FileStorage__objects.items():
     #             print_list.append(str(v))
+=======
+    def do_all(self, args):
+        """ Shows all objects, or all objects of a class"""
+        print_list = []
+        arg_tok = args.split(' ')
+        if len(arg_tok) == 0:
+            new_dict = models.storage.all()
+        elif arg_tok[0] in HBNBCommand.classes:
+            new_dict = models.storage.all(HBNBCommand.classes[arg_tok[0]])
+        else:
+            print("** class doesn't exist **")
+            return False
+        for key in new_dict:
+            print_list.append(str(new_dict[key]))
+        print("[", end="")
+        print(", ".join(print_list), end="")
+        print("]")
+>>>>>>> e60ed55b4b5c778952ea3e45151a3b87845b1743
 
     #     print(print_list)
     def do_all(self, line):
